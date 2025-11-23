@@ -1,9 +1,13 @@
 import { Card } from "@/components/ui/card";
-import { Users, Baby, Heart, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Baby, Heart, GraduationCap, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import womenImage from "@/assets/women-empowerment.jpg";
 import childrenImage from "@/assets/children-support.jpg";
 
 const Programs = () => {
+  const navigate = useNavigate();
+  
   const programs = [
     {
       icon: Users,
@@ -70,7 +74,7 @@ const Programs = () => {
                 </div>
                 <div className="p-6">
                   <p className="text-muted-foreground mb-4">{program.description}</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 mb-4">
                     {program.benefits.map((benefit, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-accent" />
@@ -78,6 +82,13 @@ const Programs = () => {
                       </div>
                     ))}
                   </div>
+                  <Button
+                    className="w-full group"
+                    onClick={() => navigate(`/programs/${program.title.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-')}`)}
+                  >
+                    Learn More
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
                 </div>
               </Card>
             );
