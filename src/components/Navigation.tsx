@@ -57,7 +57,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <button onClick={() => navigate("/")} className="flex items-center gap-2">
             <Heart className="h-8 w-8 text-primary fill-primary" />
-            <span className="text-xl font-bold text-foreground">EmpowerTogether</span>
+            <span className="text-xl font-bold text-foreground">Extended hands initiative</span>
           </button>
 
           {/* Desktop Navigation */}
