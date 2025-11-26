@@ -53,37 +53,38 @@ const Donate = () => {
 
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    if (!donorName || !amount || !programType) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setLoading(true);
     try {
-      const { error } = await supabase.from("donations").insert({
-        donor_name: isAnonymous ? "Anonymous" : donorName,
-        amount: parseFloat(amount),
-        program_type: programType || null,
-        message: message || null,
-        is_anonymous: isAnonymous,
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          amount: parseFloat(amount),
+          donorName: isAnonymous ? "Anonymous" : donorName,
+          programType,
+          message,
+        },
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Thank you for your donation!",
-        description: "Your contribution will make a real difference.",
-      });
-
-      setDonorName("");
-      setAmount("");
-      setProgramType("");
-      setMessage("");
-      setIsAnonymous(false);
-      fetchDonationStats();
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };

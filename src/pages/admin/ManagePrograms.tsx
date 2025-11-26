@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Edit } from "lucide-react";
+import { ImageUpload } from "@/components/admin/ImageUpload";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ManagePrograms = () => {
   const { isAdmin, loading } = useAuth();
@@ -60,7 +62,29 @@ const ManagePrograms = () => {
               <div><Label>Description</Label><Textarea value={currentProgram.description || ""} onChange={(e) => setCurrentProgram({ ...currentProgram, description: e.target.value })} /></div>
               <div><Label>Long Description</Label><Textarea value={currentProgram.long_description || ""} onChange={(e) => setCurrentProgram({ ...currentProgram, long_description: e.target.value })} rows={6} /></div>
               <div><Label>Services (one per line)</Label><Textarea value={currentProgram.servicesText || ""} onChange={(e) => setCurrentProgram({ ...currentProgram, servicesText: e.target.value })} rows={4} /></div>
-              <div><Label>Image URL</Label><Input value={currentProgram.image_url || ""} onChange={(e) => setCurrentProgram({ ...currentProgram, image_url: e.target.value })} /></div>
+              <div>
+                <Label>Program Image</Label>
+                <ImageUpload
+                  bucket="program-images"
+                  value={currentProgram.image_url}
+                  onChange={(url) => setCurrentProgram({ ...currentProgram, image_url: url })}
+                  onRemove={() => setCurrentProgram({ ...currentProgram, image_url: "" })}
+                />
+              </div>
+              <div>
+                <Label>Image Shape</Label>
+                <Select value={currentProgram.image_shape || "rectangle"} onValueChange={(value) => setCurrentProgram({ ...currentProgram, image_shape: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select shape" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="square">Square</SelectItem>
+                    <SelectItem value="rectangle">Rectangle (Landscape)</SelectItem>
+                    <SelectItem value="circle">Circle/Rounded</SelectItem>
+                    <SelectItem value="portrait">Portrait</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex gap-2"><Button onClick={handleSave}>Save</Button><Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button></div>
             </div>
           </Card>
