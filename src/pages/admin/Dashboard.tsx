@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Users, Image, DollarSign, UserCog } from "lucide-react";
+import { BackupExport } from "@/components/admin/BackupExport";
 
 const AdminDashboard = () => {
   const { isAdmin, loading } = useAuth();
@@ -65,7 +66,10 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 py-24">
-        <h1 className="text-4xl font-bold mb-8">Admin Dashboard</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+          <BackupExport />
+        </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {adminSections.map((section) => {
             const Icon = section.icon;

@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Edit, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface HeroImage {
   id: string;
@@ -97,11 +98,12 @@ const ManageHero = () => {
             <h2 className="text-2xl font-bold mb-4">{currentImage.id ? "Edit Image" : "New Image"}</h2>
             <div className="space-y-4">
               <div>
-                <Label>Image URL</Label>
-                <Input
-                  value={currentImage.image_url || ""}
-                  onChange={(e) => setCurrentImage({ ...currentImage, image_url: e.target.value })}
-                  placeholder="https://..."
+                <Label>Image</Label>
+                <ImageUpload
+                  bucket="hero-images"
+                  value={currentImage.image_url}
+                  onChange={(url) => setCurrentImage({ ...currentImage, image_url: url })}
+                  onRemove={() => setCurrentImage({ ...currentImage, image_url: "" })}
                 />
               </div>
               <div>

@@ -11,15 +11,18 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Edit, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ImageUpload } from "@/components/admin/ImageUpload";
+import { StorySection, StorySectionData } from "@/components/admin/StorySection";
 
 interface Story {
-  id: string;
+  id?: string;
   title: string;
   content: string;
   person_name: string;
-  person_image: string | null;
+  person_image?: string | null;
   program_type: string;
   featured: boolean;
+  sections?: StorySectionData[];
 }
 
 const ManageStories = () => {
@@ -28,7 +31,15 @@ const ManageStories = () => {
   const { toast } = useToast();
   const [stories, setStories] = useState<Story[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentStory, setCurrentStory] = useState<Partial<Story>>({});
+  const [currentStory, setCurrentStory] = useState<Partial<Story>>({
+    title: "",
+    content: "",
+    person_name: "",
+    person_image: "",
+    program_type: "",
+    featured: false,
+    sections: [],
+  });
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -40,7 +51,34 @@ const ManageStories = () => {
 
   const fetchStories = async () => {
     const { data } = await supabase.from("stories").select("*").order("created_at", { ascending: false });
-    if (data) setStories(data);
+    if (data) {
+      const stories = data.map(story => ({
+        ...story,
+        sections: (Array.isArray(story.sections) ? story.sections : []) as unknown as StorySectionData[]
+      }));
+      setStories(stories as any);
+    }
+  };
+
+  const addSection = () => {
+    const newSection: StorySectionData = {
+      id: Math.random().toString(),
+      type: "text",
+      content: "",
+    };
+    setCurrentStory({ ...currentStory, sections: [...(currentStory.sections || []), newSection] });
+  };
+
+  const updateSection = (index: number, section: StorySectionData) => {
+    const sections = [...(currentStory.sections || [])];
+    sections[index] = section;
+    setCurrentStory({ ...currentStory, sections });
+  };
+
+  const removeSection = (index: number) => {
+    const sections = [...(currentStory.sections || [])];
+    sections.splice(index, 1);
+    setCurrentStory({ ...currentStory, sections });
   };
 
   const handleSave = async () => {
@@ -50,19 +88,29 @@ const ManageStories = () => {
     }
     
     try {
+      const storyData: any = {
+        title: currentStory.title,
+        content: currentStory.content,
+        person_name: currentStory.person_name,
+        person_image: currentStory.person_image,
+        program_type: currentStory.program_type,
+        featured: currentStory.featured,
+        sections: currentStory.sections || []
+      };
+
       if (currentStory.id) {
         const { error } = await supabase
           .from("stories")
-          .update(currentStory)
+          .update(storyData)
           .eq("id", currentStory.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("stories").insert([currentStory as any]);
+        const { error } = await supabase.from("stories").insert([storyData]);
         if (error) throw error;
       }
 
       toast({ title: "Success", description: "Story saved successfully" });
-      setCurrentStory({});
+      setCurrentStory({ title: "", content: "", person_name: "", person_image: "", program_type: "", featured: false, sections: [] });
       setIsEditing(false);
       fetchStories();
     } catch (error: any) {
@@ -113,10 +161,12 @@ const ManageStories = () => {
                 />
               </div>
               <div>
-                <Label>Person Image URL</Label>
-                <Input
+                <Label>Person Image</Label>
+                <ImageUpload
+                  bucket="story-images"
                   value={currentStory.person_image || ""}
-                  onChange={(e) => setCurrentStory({ ...currentStory, person_image: e.target.value })}
+                  onChange={(url) => setCurrentStory({ ...currentStory, person_image: url })}
+                  onRemove={() => setCurrentStory({ ...currentStory, person_image: "" })}
                 />
               </div>
               <div>
@@ -142,9 +192,28 @@ const ManageStories = () => {
                 />
                 <Label>Featured Story</Label>
               </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label className="text-lg">Story Sections</Label>
+                  <Button onClick={addSection} variant="outline" size="sm" type="button">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Section
+                  </Button>
+                </div>
+                {currentStory.sections?.map((section, index) => (
+                  <StorySection
+                    key={section.id}
+                    section={section}
+                    onChange={(updated) => updateSection(index, updated)}
+                    onRemove={() => removeSection(index)}
+                  />
+                ))}
+              </div>
+
               <div className="flex gap-2">
                 <Button onClick={handleSave}>Save</Button>
-                <Button variant="outline" onClick={() => { setIsEditing(false); setCurrentStory({}); }}>
+                <Button variant="outline" onClick={() => { setIsEditing(false); setCurrentStory({ title: "", content: "", person_name: "", person_image: "", program_type: "", featured: false, sections: [] }); }}>
                   Cancel
                 </Button>
               </div>
