@@ -100,6 +100,7 @@ export type Database = {
           created_at: string | null
           description: string
           id: string
+          image_shape: string | null
           image_url: string | null
           long_description: string | null
           program_type: string
@@ -111,6 +112,7 @@ export type Database = {
           created_at?: string | null
           description: string
           id?: string
+          image_shape?: string | null
           image_url?: string | null
           long_description?: string | null
           program_type: string
@@ -122,6 +124,7 @@ export type Database = {
           created_at?: string | null
           description?: string
           id?: string
+          image_shape?: string | null
           image_url?: string | null
           long_description?: string | null
           program_type?: string
@@ -140,6 +143,7 @@ export type Database = {
           person_image: string | null
           person_name: string
           program_type: string
+          sections: Json | null
           title: string
           updated_at: string | null
         }
@@ -151,6 +155,7 @@ export type Database = {
           person_image?: string | null
           person_name: string
           program_type: string
+          sections?: Json | null
           title: string
           updated_at?: string | null
         }
@@ -162,6 +167,7 @@ export type Database = {
           person_image?: string | null
           person_name?: string
           program_type?: string
+          sections?: Json | null
           title?: string
           updated_at?: string | null
         }
