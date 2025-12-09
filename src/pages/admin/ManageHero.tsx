@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import Navigation from "@/components/Navigation";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Edit, Plus } from "lucide-react";
+import { Trash2, Edit, Plus, Image as ImageIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { SEO } from "@/components/SEO";
 
 interface HeroImage {
   id: string;
@@ -38,16 +40,23 @@ const ManageHero = () => {
   }, [isAdmin, loading, navigate]);
 
   const fetchImages = async () => {
-    const { data } = await supabase.from("hero_images").select("*").order("order_position");
+    const { data } = await supabase
+      .from("hero_images")
+      .select("*")
+      .order("order_position");
     if (data) setImages(data);
   };
 
   const handleSave = async () => {
     if (!currentImage.image_url) {
-      toast({ title: "Error", description: "Image URL is required", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Image is required",
+        variant: "destructive",
+      });
       return;
     }
-    
+
     try {
       if (currentImage.id) {
         const { error } = await supabase
@@ -56,7 +65,9 @@ const ManageHero = () => {
           .eq("id", currentImage.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("hero_images").insert([currentImage as any]);
+        const { error } = await supabase
+          .from("hero_images")
+          .insert([currentImage as any]);
         if (error) throw error;
       }
 
@@ -65,7 +76,11 @@ const ManageHero = () => {
       setIsEditing(false);
       fetchImages();
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -83,88 +98,193 @@ const ManageHero = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Manage Hero Images"
+        description="Admin panel for managing homepage carousel images"
+      />
       <Navigation />
       <div className="container mx-auto px-4 py-24">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Manage Hero Images</h1>
-          <Button onClick={() => { setIsEditing(true); setCurrentImage({ is_active: true, order_position: 0 }); }}>
-            <Plus className="mr-2 h-4 w-4" />
+        <AdminHeader
+          title="Manage Hero Images"
+          subtitle="Upload and manage homepage carousel images"
+        />
+
+        <div className="flex justify-end mb-6">
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+              setCurrentImage({ is_active: true, order_position: images.length });
+            }}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
             Add Hero Image
           </Button>
         </div>
 
-        {isEditing ? (
-          <Card className="p-6 mb-8">
-            <h2 className="text-2xl font-bold mb-4">{currentImage.id ? "Edit Image" : "New Image"}</h2>
-            <div className="space-y-4">
+        {isEditing && (
+          <Card className="p-6 mb-8 border-primary/20">
+            <h2 className="text-2xl font-bold mb-6">
+              {currentImage.id ? "Edit Image" : "New Image"}
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <Label>Image</Label>
+                <Label className="text-base font-semibold mb-3 block">
+                  Hero Image
+                </Label>
                 <ImageUpload
                   bucket="hero-images"
                   value={currentImage.image_url}
-                  onChange={(url) => setCurrentImage({ ...currentImage, image_url: url })}
-                  onRemove={() => setCurrentImage({ ...currentImage, image_url: "" })}
+                  onChange={(url) =>
+                    setCurrentImage({ ...currentImage, image_url: url })
+                  }
+                  onRemove={() =>
+                    setCurrentImage({ ...currentImage, image_url: "" })
+                  }
                 />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Recommended size: 1920x1080px for best quality
+                </p>
               </div>
-              <div>
-                <Label>Title</Label>
-                <Input
-                  value={currentImage.title || ""}
-                  onChange={(e) => setCurrentImage({ ...currentImage, title: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Subtitle</Label>
-                <Input
-                  value={currentImage.subtitle || ""}
-                  onChange={(e) => setCurrentImage({ ...currentImage, subtitle: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Order Position</Label>
-                <Input
-                  type="number"
-                  value={currentImage.order_position || 0}
-                  onChange={(e) => setCurrentImage({ ...currentImage, order_position: parseInt(e.target.value) })}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  checked={currentImage.is_active || false}
-                  onCheckedChange={(checked) => setCurrentImage({ ...currentImage, is_active: checked as boolean })}
-                />
-                <Label>Active</Label>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSave}>Save</Button>
-                <Button variant="outline" onClick={() => { setIsEditing(false); setCurrentImage({}); }}>
-                  Cancel
-                </Button>
+
+              <div className="space-y-4">
+                <div>
+                  <Label>Title (optional)</Label>
+                  <Input
+                    value={currentImage.title || ""}
+                    onChange={(e) =>
+                      setCurrentImage({ ...currentImage, title: e.target.value })
+                    }
+                    placeholder="Hero slide title"
+                  />
+                </div>
+                <div>
+                  <Label>Subtitle (optional)</Label>
+                  <Input
+                    value={currentImage.subtitle || ""}
+                    onChange={(e) =>
+                      setCurrentImage({
+                        ...currentImage,
+                        subtitle: e.target.value,
+                      })
+                    }
+                    placeholder="Hero slide subtitle"
+                  />
+                </div>
+                <div>
+                  <Label>Order Position</Label>
+                  <Input
+                    type="number"
+                    value={currentImage.order_position || 0}
+                    onChange={(e) =>
+                      setCurrentImage({
+                        ...currentImage,
+                        order_position: parseInt(e.target.value),
+                      })
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Lower numbers appear first
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    checked={currentImage.is_active || false}
+                    onCheckedChange={(checked) =>
+                      setCurrentImage({
+                        ...currentImage,
+                        is_active: checked as boolean,
+                      })
+                    }
+                  />
+                  <Label>Active (visible on website)</Label>
+                </div>
               </div>
             </div>
-          </Card>
-        ) : null}
 
-        <div className="grid md:grid-cols-2 gap-4">
+            <div className="flex gap-2 mt-6 pt-6 border-t">
+              <Button onClick={handleSave}>
+                {currentImage.id ? "Update Image" : "Add Image"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setCurrentImage({});
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-6">
           {images.map((image) => (
-            <Card key={image.id} className="p-6">
-              <img src={image.image_url} alt="Hero" className="w-full h-48 object-cover rounded mb-4" />
-              <h3 className="text-xl font-bold">{image.title || "No title"}</h3>
-              <p className="text-sm text-muted-foreground">{image.subtitle || "No subtitle"}</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Order: {image.order_position} • {image.is_active ? "Active" : "Inactive"}
-              </p>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm" onClick={() => { setCurrentImage(image); setIsEditing(true); }}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(image.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+            <Card
+              key={image.id}
+              className={`overflow-hidden ${
+                !image.is_active ? "opacity-60" : ""
+              }`}
+            >
+              <div className="aspect-video relative">
+                <img
+                  src={image.image_url}
+                  alt={image.title || "Hero image"}
+                  className="w-full h-full object-cover"
+                />
+                {!image.is_active && (
+                  <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+                    <span className="bg-muted px-3 py-1 rounded text-sm">
+                      Inactive
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="text-lg font-bold">
+                  {image.title || "No title"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {image.subtitle || "No subtitle"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Order: {image.order_position} •{" "}
+                  {image.is_active ? "Active" : "Inactive"}
+                </p>
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setCurrentImage(image);
+                      setIsEditing(true);
+                    }}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(image.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
         </div>
+
+        {images.length === 0 && !isEditing && (
+          <div className="text-center py-12 text-muted-foreground">
+            <ImageIcon className="h-16 w-16 mx-auto mb-4 opacity-30" />
+            <p className="text-lg">No hero images yet</p>
+            <p className="text-sm">Click "Add Hero Image" to get started</p>
+          </div>
+        )}
       </div>
     </div>
   );
