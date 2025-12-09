@@ -11,6 +11,7 @@ import Team from "./pages/Team";
 import Community from "./pages/Community";
 import Donate from "./pages/Donate";
 import ProgramDetail from "./pages/ProgramDetail";
+import Sitemap from "./pages/Sitemap";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ManageStories from "./pages/admin/ManageStories";
 import ManageTeam from "./pages/admin/ManageTeam";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/community" element={<Community />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/programs/:type" element={<ProgramDetail />} />
+            <Route path="/sitemap" element={<Sitemap />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/stories" element={<ManageStories />} />
             <Route path="/admin/team" element={<ManageTeam />} />
